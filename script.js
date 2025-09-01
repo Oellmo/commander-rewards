@@ -418,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         'py-1',
                         'rounded'
                     );
-                    boughtBanner.textContent = 'Bought';
+                    boughtBanner.textContent = 'bought';
                     cardElement.appendChild(boughtBanner);
                 } else {
                     // Drei-Punkte-Menüsymbol
