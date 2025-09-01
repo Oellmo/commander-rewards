@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stitch</title>
+    <link rel="icon" type="image/x-icon" href="/path/to/icon-192x192.png">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?display=swap&family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700;900">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style type="text/tailwindcss">
+        :root {
+            --primary-color: #ea2a33;
+            --secondary-color: #fef0f0;
+            --background-color: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --accent-color: #fecaca;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+        }
+        .page {
+            display: none;
+            height: calc(100vh - 6rem);
+            position: absolute;
+            top: 3rem;
+            left: 0;
+            right: 0;
+            overflow: hidden;
+        }
+        .page.active {
+            display: flex;
+        }
+        .overflow-y-auto {
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) #fef0f0;
+        }
+        .overflow-y-auto::-webkit-scrollbar {
+            width: 8px;
+        }
+        .overflow-y-auto::-webkit-scrollbar-track {
+            background: #fef0f0;
+            border-radius: 10px;
+        }
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 10px;
+            border: 2px solid #fef0f0;
+        }
+    </style>
+</head>
+<body class="bg-[var(--background-color)] text-[var(--text-primary)] relative min-h-screen">
+    <div class="max-w-md mx-auto relative h-screen">
+        <header class="h-12 w-full flex items-center justify-between px-5 py-3 shadow-sm bg-white fixed top-0 max-w-md z-50">
+            <h1 id="header-title" class="text-xl font-bold">Dashboard</h1>
+        </header>
+
+        <main class="h-full pt-12 pb-12 overflow-hidden">
+            <div id="activity-page" class="page size-full px-5 py-6 flex flex-col gap-8">
+                <div class="flex-1 overflow-y-auto flex flex-col gap-4">
+                    <div class="flex flex-col gap-2">
+                        <h2 class="font-bold text-lg leading-normal">Today's Workout</h2>
+                        <div class="p-4 rounded-xl bg-[var(--secondary-color)] flex items-center justify-between">
+                            <p class="font-semibold">Workout Name</p>
+                            <p id="workout-timer" class="font-semibold">00:00:00</p>
+                            <button id="start-workout-button" class="px-5 py-2 text-white bg-[var(--primary-color)] rounded-xl text-sm font-semibold">Start</button>
+                            <button id="end-workout-button" class="hidden px-5 py-2 text-white bg-gray-500 rounded-xl text-sm font-semibold">End</button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col gap-2">
+                        <h2 class="font-bold text-lg leading-normal">Previous Workouts</h2>
+                        <div id="previous-workouts-list" class="flex flex-col gap-4">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dashboard-page" class="page active size-full px-5 py-6 flex flex-col gap-8">
+                <div class="flex-1 flex flex-col gap-4 overflow-y-auto">
+                    <div id="calendar" class="p-4 rounded-xl bg-[var(--secondary-color)]">
+                        </div>
+
+                    <div class="flex flex-col gap-2">
+                        <h2 class="font-bold text-lg leading-normal">Stats</h2>
+                        <div class="p-4 rounded-xl bg-[var(--secondary-color)]">
+                            <div class="flex items-center justify-between">
+                                <p class="font-semibold text-sm">Cards Collected</p>
+                                <p id="cards-collected-stat" class="font-bold text-lg">0</p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <p class="font-semibold text-sm">Workouts Completed</p>
+                                <p id="workouts-completed-stat" class="font-bold text-lg">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="reward-page" class="page size-full px-5 py-6 flex flex-col gap-8">
+                <div class="flex-1 flex flex-col gap-4 items-center justify-center">
+                    <h2 class="font-bold text-lg leading-normal text-center">Your Next Reward</h2>
+                    <div id="reward-card-container" class="w-2/3 md:w-1/2 lg:w-1/3 aspect-[672/936] transition-transform duration-500">
+                        <div id="reward-card-back" class="size-full absolute inset-0 rounded-lg shadow-md bg-gray-300 flex items-center justify-center p-4 transition-transform duration-500 backface-hidden" style="transform: rotateY(0deg);">
+                            <p class="font-bold text-lg text-center">Tap to Reveal</p>
+                        </div>
+                        <div id="reward-card-front" class="size-full absolute inset-0 rounded-lg shadow-md transition-transform duration-500 backface-hidden" style="transform: rotateY(-180deg);">
+                            <img id="reward-card-image" class="size-full rounded-lg object-cover" src="" alt="Reward Card"/>
+                        </div>
+                    </div>
+                    <button id="claim-reward-button" class="px-5 py-2 text-white bg-[var(--primary-color)] rounded-xl text-sm font-semibold">Claim Reward</button>
+                    <p id="reward-status-message" class="text-center text-sm font-medium leading-normal mt-4"></p>
+                </div>
+            </div>
+
+            <div id="collection-page" class="page size-full px-5 py-6 flex flex-col gap-8">
+                <div class="flex flex-col gap-2">
+                    <h2 class="font-bold text-lg leading-normal">Your Collection</h2>
+                    <div class="flex items-center gap-2">
+                        <p class="text-sm font-semibold">Filter by Rarity:</p>
+                        <select id="rarity-filter" class="px-3 py-1 border border-gray-300 rounded-md text-sm">
+                            <option value="All">All</option>
+                            <option value="common">Common</option>
+                            <option value="uncommon">Uncommon</option>
+                            <option value="rare">Rare</option>
+                            <option value="mythic">Mythic Rare</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="collection-grid" class="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-y-auto">
+                    </div>
+            </div>
+
+            <div id="reward-settings-page" class="page size-full px-5 py-6 flex flex-col gap-8">
+                <div class="flex flex-col gap-4 p-4 rounded-xl bg-[var(--secondary-color)]">
+                    <h2 class="font-bold text-lg leading-normal">Add a New Reward Card</h2>
+                    <div class="flex flex-col gap-2">
+                        <p class="text-sm font-semibold">Card Name</p>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="reward-input" placeholder="Type a card name" class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] bg-white text-sm" list="card-suggestions">
+                            <datalist id="card-suggestions"></datalist>
+                            <button id="add-reward-card-button" class="px-5 py-2 text-white bg-[var(--primary-color)] rounded-xl text-sm font-semibold">Add</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col gap-2 mt-4">
+                    <p class="text-sm font-semibold">Add Multiple Cards (one per line)</p>
+                    <textarea id="bulk-reward-input" placeholder="Enter multiple card names, each on a new line." rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] bg-white text-sm"></textarea>
+                    <button id="add-bulk-cards-button" class="px-5 py-2 text-white bg-[var(--primary-color)] rounded-xl text-sm font-semibold">Add Bulk</button>
+                </div>
+                
+                <div class="flex-1 flex flex-col gap-4 overflow-y-auto">
+                    <h2 class="font-bold text-lg leading-normal">Your Deck</h2>
+                    <ul id="reward-deck-list" class="flex flex-col gap-2">
+                    </ul>
+                </div>
+            </div>
+        </main>
+
+        <footer class="h-12 w-full fixed bottom-0 max-w-md z-50 bg-white shadow-sm">
+            <div class="size-full flex justify-around items-center px-4 py-2">
+                <a class="flex flex-1 flex-col items-center justify-end gap-1 text-[var(--text-secondary)]" href="#" onclick="navigate('activity')">
+                    <span class="material-symbols-outlined">directions_run</span>
+                    <p class="text-xs font-medium leading-normal">Activity</p>
+                </a>
+                <a class="flex flex-1 flex-col items-center justify-end gap-1 text-[var(--primary-color)]" href="#" onclick="navigate('dashboard')">
+                    <span class="material-symbols-outlined">layers</span>
+                    <p class="text-xs font-medium leading-normal">Dashboard</p>
+                </a>
+                <a class="flex flex-1 flex-col items-center justify-end gap-1 text-[var(--text-secondary)]" href="#" onclick="navigate('collection')">
+                    <span class="material-symbols-outlined">style</span>
+                    <p class="text-xs font-medium leading-normal">Collection</p>
+                </a>
+                <a class="flex flex-1 flex-col items-center justify-end gap-1 text-[var(--text-secondary)]" href="#" onclick="navigate('reward-settings')">
+                    <span class="material-symbols-outlined">settings</span>
+                    <p class="text-xs font-medium leading-normal">Settings</p>
+                </a>
+            </div>
+        </footer>
+
+    </div>
+
+    <link rel="manifest" href="manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').then(registration => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                }).catch(err => {
+                    console.log('Service Worker registration failed:', err);
+                });
+            });
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
