@@ -150,13 +150,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Verwende die eindeutige ID zum Löschen
     function deleteWorkout(workoutId) {
-        let workouts = JSON.parse(localStorage.getItem('workouts')) || [];
-        workouts = workouts.filter(workout => workout.id !== workoutId);
-        localStorage.setItem('workouts', JSON.stringify(workouts));
-        renderPreviousWorkouts();
-        updateStats();
-        renderCalendar();
-        checkRewardEligibility();
+        // Bestätigungsdialog hinzufügen
+        const confirmDelete = window.confirm("Are you sure you want to delete this workout?");
+        if (confirmDelete) {
+            let workouts = JSON.parse(localStorage.getItem('workouts')) || [];
+            workouts = workouts.filter(workout => workout.id !== workoutId);
+            localStorage.setItem('workouts', JSON.stringify(workouts));
+            renderPreviousWorkouts();
+            updateStats();
+            renderCalendar();
+            checkRewardEligibility();
+        }
     }
     window.deleteWorkout = deleteWorkout;
 
@@ -167,10 +171,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateStats() {
         const collection = JSON.parse(localStorage.getItem('collection')) || [];
         const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
-        const rewardDeck = JSON.parse(localStorage.getItem('rewardDeck')) || []; // <-- Diese Zeile hinzufügen
+        const rewardDeck = JSON.parse(localStorage.getItem('rewardDeck')) || [];
 
         if (cardsCollectedStat) {
-            cardsCollectedStat.textContent = `${collection.length} / ${collection.length + rewardDeck.length}`; // <-- Diese Zeile ändern
+            cardsCollectedStat.textContent = `${collection.length} / ${collection.length + rewardDeck.length}`;
         }
         if (workoutsCompletedStat) {
             workoutsCompletedStat.textContent = workouts.length;
@@ -496,12 +500,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function deleteCardFromRewardDeck(cardName) {
-        let rewardDeck = JSON.parse(localStorage.getItem('rewardDeck')) || [];
-        rewardDeck = rewardDeck.filter(card => card.name !== cardName);
-        localStorage.setItem('rewardDeck', JSON.stringify(rewardDeck));
-        renderRewardDeck();
+        const confirmDelete = window.confirm(`Are you sure you want to delete the card "${cardName}"?`);
+        if (confirmDelete) {
+            let rewardDeck = JSON.parse(localStorage.getItem('rewardDeck')) || [];
+            rewardDeck = rewardDeck.filter(card => card.name !== cardName);
+            localStorage.setItem('rewardDeck', JSON.stringify(rewardDeck));
+            renderRewardDeck();
+        }
     }
-    
+    window.deleteCardFromRewardDeck = deleteCardFromRewardDeck;
+
     // Scryfall API Helper-Funktion
     async function getScryfallData(cardName) {
         try {
