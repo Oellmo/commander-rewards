@@ -69,10 +69,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (startWorkoutButton) {
         startWorkoutButton.addEventListener('click', () => {
             startTime = Date.now();
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const localDateStr = `${year}-${month}-${day}`;
+
             currentWorkout = {
-                // Verwende den vollständigen ISO-String als eindeutige ID
                 id: new Date().toISOString(),
-                date: new Date().toISOString().split('T')[0],
+                date: localDateStr,
                 duration: 0
             };
             timerInterval = setInterval(updateTimer, 1000);
@@ -91,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentWorkout = null;
                 updateStats();
                 checkRewardEligibility();
-                // Automatische Navigation zur Belohnungsseite nach dem Workout
                 navigate('reward');
             }
             workoutTimer.textContent = '00:00:00';
@@ -124,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
         if (previousWorkoutsList) {
             previousWorkoutsList.innerHTML = '';
-            // Umgekehrte Reihenfolge, um die neuesten Workouts oben anzuzeigen
             const sortedWorkouts = workouts.slice().reverse();
             sortedWorkouts.forEach(workout => {
                 const durationInSeconds = Math.floor(workout.duration / 1000);
@@ -135,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 workoutElement.classList.add('p-4', 'rounded-xl', 'bg-[var(--secondary-color)]', 'flex', 'items-center', 'justify-between');
                 workoutElement.innerHTML = `
                     <div>
-                        <p class="font-semibold">${new Date(workout.date).toLocaleDateString()}</p>
+                        <p class="font-semibold">${new Date(workout.date).toLocaleDateString('de-DE')}</p>
                         <p class="text-sm text-[var(--text-secondary)]">Duration: ${pad(hours)}:${pad(minutes)}:${pad(seconds)}</p>
                     </div>
                     <button onclick="deleteWorkout('${workout.id}')">
@@ -146,11 +149,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
-    window.renderPreviousWorkouts = renderPreviousWorkouts; // Global verfügbar machen
+    window.renderPreviousWorkouts = renderPreviousWorkouts;
 
-    // Verwende die eindeutige ID zum Löschen
     function deleteWorkout(workoutId) {
-        // Bestätigungsdialog hinzufügen
         const confirmDelete = window.confirm("Are you sure you want to delete this workout?");
         if (confirmDelete) {
             let workouts = JSON.parse(localStorage.getItem('workouts')) || [];
@@ -164,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     window.deleteWorkout = deleteWorkout;
 
-    // Dashboard Logik (von 2_dashboard.html)
+    // Dashboard Logik
     const cardsCollectedStat = document.getElementById('cards-collected-stat');
     const workoutsCompletedStat = document.getElementById('workouts-completed-stat');
 
@@ -217,11 +218,20 @@ document.addEventListener('DOMContentLoaded', () => {
             dayElement.classList.add('w-8', 'h-8', 'rounded-full', 'flex', 'items-center', 'justify-center', 'font-medium', 'text-sm');
             dayElement.textContent = day;
 
-            const dateStr = new Date(today.getFullYear(), today.getMonth(), day).toISOString().split('T')[0];
+            const currentDate = new Date(today.getFullYear(), today.getMonth(), day);
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const dayOfMonth = String(currentDate.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${dayOfMonth}`;
+
+            // Wenn ein Workout abgeschlossen wurde, färbe den Tag grün
             if (workoutDates.has(dateStr)) {
                 dayElement.classList.add('bg-[var(--primary-color)]', 'text-white');
-            } else if (day === today.getDate()) {
-                dayElement.classList.add('bg-[var(--accent-color)]');
+            }
+
+            // Wenn es der heutige Tag ist, füge einen orangefarbenen Rand hinzu
+            if (day === today.getDate() && currentDate.getMonth() === today.getMonth() && currentDate.getFullYear() === today.getFullYear()) {
+                dayElement.classList.add('border-2', 'border-[var(--accent-color)]');
             }
 
             calendarDaysEl.appendChild(dayElement);
@@ -232,11 +242,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const rewardCardFlipper = document.getElementById('reward-card-flipper');
     const rewardCardFront = document.getElementById('reward-card-front');
     const rewardCardBack = document.getElementById('reward-card-back');
-    const rewardCardImage = document.getElementById('reward-card-image'); // Das Bild auf der Rückseite
+    const rewardCardImage = document.getElementById('reward-card-image');
     const claimRewardButton = document.getElementById('claim-reward-button');
     const rewardStatusMessage = document.getElementById('reward-status-message');
 
-    let isCardFlipped = false; // Zustand, um zu verfolgen, ob die Karte gedreht ist
+    let isCardFlipped = false;
 
     function checkRewardEligibility() {
         const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
@@ -263,20 +273,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (claimRewardButton) {
-        // Der "Claim Reward" Button wird jetzt die Karte umdrehen
         claimRewardButton.addEventListener('click', () => {
-            if (!isCardFlipped) { // Nur umdrehen, wenn nicht bereits umgedreht
+            if (!isCardFlipped) {
                 flipCardAndClaimReward();
             } else {
-                // Wenn die Karte bereits gedreht ist, könnte der Button eine andere Aktion auslösen
-                // Zum Beispiel, direkt eine neue Belohnung beanspruchen, wenn eine verfügbar ist
-                // Oder einfach nichts tun, wenn keine neue Belohnung verfügbar ist
-                checkRewardEligibility(); // Aktualisiert den Status, falls sich die Bedingungen geändert haben
+                checkRewardEligibility();
             }
         });
     }
 
-    // Event-Listener für das Klicken auf die Karte selbst
     if (rewardCardFlipper) {
         rewardCardFlipper.addEventListener('click', () => {
             if (!isCardFlipped) {
@@ -299,25 +304,22 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Karte drehen
         if (rewardCardFlipper) {
             rewardCardFlipper.style.transform = 'rotateY(180deg)';
             isCardFlipped = true;
         }
 
-        // Belohnung beanspruchen nach kurzer Verzögerung
         setTimeout(async () => {
-            await claimRewardLogic(); // Die eigentliche Logik zum Beanspruchen der Belohnung
-        }, 350); // Halbe Dauer der Dreh-Animation
+            await claimRewardLogic();
+        }, 350);
 
-        // Nach einer weiteren Verzögerung die Karte wieder auf die Vorderseite drehen
         setTimeout(() => {
             if (rewardCardFlipper) {
                 rewardCardFlipper.style.transform = 'rotateY(0deg)';
                 isCardFlipped = false;
             }
-            initRewardPage(); // Setzt die Reward-Seite zurück
-        }, 300000); // Zeigt die aufgedeckte Karte für 5 Minuten an
+            initRewardPage();
+        }, 300000);
     }
 
     async function claimRewardLogic() {
@@ -326,16 +328,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const randomIndex = Math.floor(Math.random() * rewardDeck.length);
         const claimedCard = rewardDeck[randomIndex];
         
-        // Füge die Karte zur Sammlung hinzu
         const collection = JSON.parse(localStorage.getItem('collection')) || [];
         collection.push(claimedCard);
         localStorage.setItem('collection', JSON.stringify(collection));
 
-        // Entferne die Karte aus dem Deck
         rewardDeck.splice(randomIndex, 1);
         localStorage.setItem('rewardDeck', JSON.stringify(rewardDeck));
 
-        // Update the UI with the claimed card image
         if (rewardCardImage && claimedCard.image_uris && claimedCard.image_uris.normal) {
             rewardCardImage.src = claimedCard.image_uris.normal;
             rewardCardImage.alt = claimedCard.name;
@@ -345,23 +344,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         updateStats();
-        // checkRewardEligibility wird in initRewardPage aufgerufen
     }
     
-    // Initialisierung der Belohnungsseite
     function initRewardPage() {
         if (rewardCardFlipper) {
-            rewardCardFlipper.style.transform = 'rotateY(0deg)'; // Stellt sicher, dass die Karte auf der Vorderseite ist
+            rewardCardFlipper.style.transform = 'rotateY(0deg)';
             isCardFlipped = false;
         }
         if (rewardCardImage) {
-            rewardCardImage.src = 'https://via.placeholder.com/300x420?text=Claim+Your+Reward'; // Setzt das Bild zurück
+            rewardCardImage.src = 'https://via.placeholder.com/300x420?text=Claim+Your+Reward';
             rewardCardImage.alt = 'Reward Card Placeholder';
         }
-        checkRewardEligibility(); // Aktualisiert den Belohnungsstatus
+        checkRewardEligibility();
     }
     
-    // Sammlung Logik (von 4_collection.html)
+    // Sammlung Logik
     const collectionGrid = document.getElementById('collection-grid');
     const rarityFilter = document.getElementById('rarity-filter');
     if (rarityFilter) {
@@ -379,11 +376,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (filteredCards.length > 0) {
             for (const card of filteredCards) {
                 const cardElement = document.createElement('div');
-                cardElement.classList.add('w-full', 'cursor-pointer', 'duration-300'); // Nur noch 'duration-300' für ggf. andere Animationen
+                cardElement.classList.add('w-full', 'cursor-pointer', 'duration-300');
                 const imgURL = card.image_uris.normal;
                 cardElement.innerHTML = `<img alt="${card.name}" class="w-full rounded-lg shadow-md aspect-[672/936] object-cover" src="${imgURL}"/>`;
 
-                // Event-Listener für das Öffnen des Vollbildmodus
                 cardElement.addEventListener('click', () => {
                     const fullscreenOverlay = document.getElementById('fullscreen-overlay');
                     const fullscreenImage = document.getElementById('fullscreen-image');
@@ -421,12 +417,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const cardNamesText = bulkRewardInput.value.trim();
             if (cardNamesText) {
                 const cardNames = cardNamesText.split('\n').map(name => {
-                    // Diese Zeile entfernt die führende Nummer und das Leerzeichen.
                     const cleanedName = name.trim().replace(/^\d+\s/, '');
                     return cleanedName;
                 }).filter(name => name !== '');
                 
-                // Hier wurde der Code geändert, um await zu verwenden
                 for (const name of cardNames) {
                     await addCardToRewardDeck(name);
                 }
@@ -536,12 +530,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (closeFullscreenOverlayButton) {
         closeFullscreenOverlayButton.addEventListener('click', () => {
-            fullscreenOverlay.classList.add('hidden'); // Overlay ausblenden
+            fullscreenOverlay.classList.add('hidden');
         });
     }
 
     if (fullscreenOverlay) {
-        // Schließt das Overlay auch, wenn man daneben klickt
         fullscreenOverlay.addEventListener('click', (event) => {
             if (event.target === fullscreenOverlay) {
                 fullscreenOverlay.classList.add('hidden');
@@ -557,7 +550,7 @@ async function fetchCardSuggestions(query) {
     }
     const response = await fetch(`https://api.scryfall.com/cards/autocomplete?q=${encodeURIComponent(query)}`);
     const data = await response.json();
-    return data.data; // Das 'data'-Array enthält die Kartennamen
+    return data.data;
 }
 
 // Event-Listener für die Autovervollständigung
