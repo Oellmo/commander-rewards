@@ -49,6 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
             initRewardPage();
         } else if (pageId === 'reward-settings') {
             renderRewardDeck();
+        } else if (pageId === 'activity') {
+            renderPreviousWorkouts();
         }
     }
 
@@ -68,6 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
         startWorkoutButton.addEventListener('click', () => {
             startTime = Date.now();
             currentWorkout = {
+                // Verwende den vollständigen ISO-String als eindeutige ID
+                id: new Date().toISOString(),
                 date: new Date().toISOString().split('T')[0],
                 duration: 0
             };
@@ -120,21 +124,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
         if (previousWorkoutsList) {
             previousWorkoutsList.innerHTML = '';
-            workouts.forEach(workout => {
+            // Umgekehrte Reihenfolge, um die neuesten Workouts oben anzuzeigen
+            const sortedWorkouts = workouts.slice().reverse();
+            sortedWorkouts.forEach(workout => {
                 const durationInSeconds = Math.floor(workout.duration / 1000);
                 const hours = Math.floor(durationInSeconds / 3600);
                 const minutes = Math.floor((durationInSeconds % 3600) / 60);
                 const seconds = durationInSeconds % 60;
                 const workoutElement = document.createElement('div');
-                workoutElement.classList.add('p-4', 'rounded-xl', 'bg-[var(--secondary-color)]');
+                workoutElement.classList.add('p-4', 'rounded-xl', 'bg-[var(--secondary-color)]', 'flex', 'items-center', 'justify-between');
                 workoutElement.innerHTML = `
-                    <p class="font-semibold">${new Date(workout.date).toLocaleDateString()}</p>
-                    <p class="text-sm text-[var(--text-secondary)]">Duration: ${pad(hours)}:${pad(minutes)}:${pad(seconds)}</p>
+                    <div>
+                        <p class="font-semibold">${new Date(workout.date).toLocaleDateString()}</p>
+                        <p class="text-sm text-[var(--text-secondary)]">Duration: ${pad(hours)}:${pad(minutes)}:${pad(seconds)}</p>
+                    </div>
+                    <button onclick="deleteWorkout('${workout.id}')">
+                        <span class="material-symbols-outlined text-red-500 text-sm">close</span>
+                    </button>
                 `;
                 previousWorkoutsList.appendChild(workoutElement);
             });
         }
     }
+    window.renderPreviousWorkouts = renderPreviousWorkouts; // Global verfügbar machen
+
+    // Verwende die eindeutige ID zum Löschen
+    function deleteWorkout(workoutId) {
+        let workouts = JSON.parse(localStorage.getItem('workouts')) || [];
+        workouts = workouts.filter(workout => workout.id !== workoutId);
+        localStorage.setItem('workouts', JSON.stringify(workouts));
+        renderPreviousWorkouts();
+        updateStats();
+        renderCalendar();
+        checkRewardEligibility();
+    }
+    window.deleteWorkout = deleteWorkout;
 
     // Dashboard Logik (von 2_dashboard.html)
     const cardsCollectedStat = document.getElementById('cards-collected-stat');
@@ -143,8 +167,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateStats() {
         const collection = JSON.parse(localStorage.getItem('collection')) || [];
         const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
+        const rewardDeck = JSON.parse(localStorage.getItem('rewardDeck')) || []; // <-- Diese Zeile hinzufügen
+
         if (cardsCollectedStat) {
-            cardsCollectedStat.textContent = collection.length;
+            cardsCollectedStat.textContent = `${collection.length} / ${collection.length + rewardDeck.length}`; // <-- Diese Zeile ändern
         }
         if (workoutsCompletedStat) {
             workoutsCompletedStat.textContent = workouts.length;
@@ -287,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 isCardFlipped = false;
             }
             initRewardPage(); // Setzt die Reward-Seite zurück
-        }, 3000); // Zeigt die aufgedeckte Karte für 3 Sekunden an
+        }, 300000); // Zeigt die aufgedeckte Karte für 5 Minuten an
     }
 
     async function claimRewardLogic() {
@@ -349,9 +375,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (filteredCards.length > 0) {
             for (const card of filteredCards) {
                 const cardElement = document.createElement('div');
-                cardElement.classList.add('w-full', 'cursor-pointer', 'transition-transform', 'duration-300', 'hover:scale-105');
+                cardElement.classList.add('w-full', 'cursor-pointer', 'duration-300'); // Nur noch 'duration-300' für ggf. andere Animationen
                 const imgURL = card.image_uris.normal;
                 cardElement.innerHTML = `<img alt="${card.name}" class="w-full rounded-lg shadow-md aspect-[672/936] object-cover" src="${imgURL}"/>`;
+
+                // Event-Listener für das Öffnen des Vollbildmodus
+                cardElement.addEventListener('click', () => {
+                    const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+                    const fullscreenImage = document.getElementById('fullscreen-image');
+                    if (fullscreenImage && fullscreenOverlay) {
+                        fullscreenImage.src = imgURL;
+                        fullscreenOverlay.classList.remove('hidden');
+                    }
+                });
+
                 collectionGrid.appendChild(cardElement);
             }
         } else {
@@ -376,18 +413,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (addBulkCardsButton) {
-        addBulkCardsButton.addEventListener('click', () => {
+        addBulkCardsButton.addEventListener('click', async () => {
             const cardNamesText = bulkRewardInput.value.trim();
             if (cardNamesText) {
                 const cardNames = cardNamesText.split('\n').map(name => {
-                    // Remove leading number and space
+                    // Diese Zeile entfernt die führende Nummer und das Leerzeichen.
                     const cleanedName = name.trim().replace(/^\d+\s/, '');
                     return cleanedName;
                 }).filter(name => name !== '');
                 
-                cardNames.forEach(name => {
-                    addCardToRewardDeck(name);
-                });
+                // Hier wurde der Code geändert, um await zu verwenden
+                for (const name of cardNames) {
+                    await addCardToRewardDeck(name);
+                }
+                
                 bulkRewardInput.value = '';
             }
         });
@@ -443,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cardDetails = document.createElement('div');
                 cardDetails.classList.add('flex', 'items-center', 'gap-4');
                 const imgURL = card.image_uris.small;
-                cardDetails.innerHTML = `<img alt="${card.name}" class="w-12 h-12 rounded-full object-cover" src="${imgURL}"/>`;
+                cardDetails.innerHTML = `<img alt="${card.name}" class="w-12 h-12 rounded-md object-cover" src="${imgURL}"/>`;
                 cardDetails.innerHTML += `<p class="font-semibold">${card.name}</p>`;
 
                 liElement.appendChild(cardDetails);
@@ -480,7 +519,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialisiere die erste Seite (Dashboard)
     navigate('dashboard');
-    renderRewardDeck(); // Stellt sicher, dass die Belohnungskarten beim Start geladen werden
+    renderPreviousWorkouts();
+    updateStats();
+    
+    // Logik für das Schließen des Vollbild-Overlays
+    const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+    const closeFullscreenOverlayButton = document.getElementById('close-fullscreen-overlay');
+
+    if (closeFullscreenOverlayButton) {
+        closeFullscreenOverlayButton.addEventListener('click', () => {
+            fullscreenOverlay.classList.add('hidden'); // Overlay ausblenden
+        });
+    }
+
+    if (fullscreenOverlay) {
+        // Schließt das Overlay auch, wenn man daneben klickt
+        fullscreenOverlay.addEventListener('click', (event) => {
+            if (event.target === fullscreenOverlay) {
+                fullscreenOverlay.classList.add('hidden');
+            }
+        });
+    }
 });
 
 // Function zum Abrufen von Vorschlägen von der Scryfall API
