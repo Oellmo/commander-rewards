@@ -69,10 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (startWorkoutButton) {
         startWorkoutButton.addEventListener('click', () => {
             startTime = Date.now();
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
             currentWorkout = {
-                // Verwende den vollständigen ISO-String als eindeutige ID
-                id: new Date().toISOString(),
-                date: new Date().toISOString().split('T')[0],
+                id: today.toISOString(),
+                date: `${yyyy}-${mm}-${dd}`,
                 duration: 0
             };
             timerInterval = setInterval(updateTimer, 1000);
@@ -213,11 +216,20 @@ document.addEventListener('DOMContentLoaded', () => {
             dayElement.classList.add('w-8', 'h-8', 'rounded-full', 'flex', 'items-center', 'justify-center', 'font-medium', 'text-sm');
             dayElement.textContent = day;
 
-            const dateStr = new Date(today.getFullYear(), today.getMonth(), day).toISOString().split('T')[0];
+            const currentDate = new Date(today.getFullYear(), today.getMonth(), day);
+            const yyyy = currentDate.getFullYear();
+            const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(currentDate.getDate()).padStart(2, '0');
+            const dateStr = `${yyyy}-${mm}-${dd}`;
+            
+            // Unabhängige Überprüfung für Workout-Tag
             if (workoutDates.has(dateStr)) {
                 dayElement.classList.add('bg-[var(--primary-color)]', 'text-white');
-            } else if (day === today.getDate()) {
-                dayElement.classList.add('bg-[var(--accent-color)]');
+            }
+
+            // Unabhängige Überprüfung für das heutige Datum
+            if (day === today.getDate() && today.getMonth() === currentDate.getMonth() && today.getFullYear() === currentDate.getFullYear()) {
+                dayElement.classList.add('border-2', 'border-[var(--accent-color)]');
             }
 
             calendarDaysEl.appendChild(dayElement);
