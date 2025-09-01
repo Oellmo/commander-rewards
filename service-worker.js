@@ -4,7 +4,8 @@ const urlsToCache = [
   '/index.html',
   '/script.js',
   '/manifest.json',
-  '/path/to/icon-192x192.png',
+  '/rewards-192x192.png',
+   '/rewards-512x512.png',
   'https://fonts.googleapis.com/css2?display=swap&family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700;900',
   'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined',
   'https://cdn.tailwindcss.com?plugins=forms,container-queries'
