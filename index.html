@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stitch</title>
+    <title>Commander-Rewards</title>
     <link rel="icon" type="image/x-icon" href="/path/to/icon-192x192.png">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?display=swap&family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700;900">
@@ -16,7 +16,7 @@
             --background-color: #ffffff;
             --text-primary: #1a1a1a;
             --text-secondary: #6b7280;
-            --accent-color: #FA7921;
+            --accent-color: #119DA4;
         }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -65,7 +65,7 @@
                     <div class="flex flex-col gap-2">
                         <h2 class="font-bold text-lg leading-normal">Today's Workout</h2>
                         <div class="p-4 rounded-xl bg-[var(--secondary-color)] flex items-center justify-between">
-                            <p class="font-semibold">Workout Name</p>
+                            <p class="font-semibold">Workout</p>
                             <p id="workout-timer" class="font-semibold">00:00:00</p>
                             <button id="start-workout-button" class="px-5 py-2 text-white bg-[var(--primary-color)] rounded-xl text-sm font-semibold">Start</button>
                             <button id="end-workout-button" class="hidden px-5 py-2 text-white bg-gray-500 rounded-xl text-sm font-semibold">End</button>
@@ -156,7 +156,7 @@
                 
                 <div class="flex flex-col gap-2 mt-4">
                     <p class="text-sm font-semibold">Add Multiple Cards (one per line)</p>
-                    <textarea id="bulk-reward-input" placeholder="Enter multiple card names, each on a new line." rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] bg-white text-sm"></textarea>
+                    <textarea id="bulk-reward-input" placeholder="Enter multiple card names, each on a new line." rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] bg-white text-sm" style="height: 70px;"></textarea>
                     <button id="add-bulk-cards-button" class="px-5 py-2 text-white bg-[var(--primary-color)] rounded-xl text-sm font-semibold">Add Bulk</button>
                 </div>
                 
@@ -170,13 +170,13 @@
 
         <footer class="h-12 w-full fixed bottom-0 max-w-md z-50 bg-white shadow-sm">
             <div class="size-full flex justify-around items-center px-4 py-2">
+                <a class="flex flex-1 flex-col items-center justify-end gap-1 text-[var(--primary-color)]" href="#" onclick="navigate('dashboard')">
+                    <span class="material-symbols-outlined">layers</span>
+                    <p class="text-xs font-medium leading-normal">Home</p>
+                </a>
                 <a class="flex flex-1 flex-col items-center justify-end gap-1 text-[var(--text-secondary)]" href="#" onclick="navigate('activity')">
                     <span class="material-symbols-outlined">directions_run</span>
                     <p class="text-xs font-medium leading-normal">Activity</p>
-                </a>
-                <a class="flex flex-1 flex-col items-center justify-end gap-1 text-[var(--primary-color)]" href="#" onclick="navigate('dashboard')">
-                    <span class="material-symbols-outlined">layers</span>
-                    <p class="text-xs font-medium leading-normal">Dashboard</p>
                 </a>
                 <a class="flex flex-1 flex-col items-center justify-end gap-1 text-[var(--text-secondary)]" href="#" onclick="navigate('collection')">
                     <span class="material-symbols-outlined">style</span>
@@ -189,6 +189,10 @@
             </div>
         </footer>
 
+    </div>
+    <div id="fullscreen-overlay" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 hidden">
+    <img id="fullscreen-image" src="" alt="Full Screen Card" class="max-w-[90%] max-h-[90%] object-contain">
+    <button id="close-fullscreen-overlay" class="absolute top-4 right-4 text-white text-4xl">&times;</button>
     </div>
 
     <link rel="manifest" href="manifest.json">
