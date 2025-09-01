@@ -198,25 +198,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Belohnungs-Logik (von 3_reward.html)
-    const rewardCardContainer = document.getElementById('reward-card-container');
+    // Belohnungs-Logik (mit Drehfunktion)
+    const rewardCardFlipper = document.getElementById('reward-card-flipper');
     const rewardCardFront = document.getElementById('reward-card-front');
     const rewardCardBack = document.getElementById('reward-card-back');
+    const rewardCardImage = document.getElementById('reward-card-image'); // Das Bild auf der Rückseite
     const claimRewardButton = document.getElementById('claim-reward-button');
     const rewardStatusMessage = document.getElementById('reward-status-message');
+
+    let isCardFlipped = false; // Zustand, um zu verfolgen, ob die Karte gedreht ist
 
     function checkRewardEligibility() {
         const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
         const collectedCards = JSON.parse(localStorage.getItem('collection')) || [];
         const deck = JSON.parse(localStorage.getItem('rewardDeck')) || [];
         
-        // Bedingung für die Belohnung ohne Zeitbegrenzung
         const rewardConditionsMet = workouts.length > collectedCards.length;
 
         if (rewardConditionsMet && deck.length > 0) {
             if (claimRewardButton) {
                 claimRewardButton.classList.remove('hidden');
-                rewardStatusMessage.textContent = 'You have earned a reward! Tap to claim.';
+                rewardStatusMessage.textContent = 'You have earned a reward! Tap to reveal.';
             }
         } else {
             if (claimRewardButton) {
@@ -230,32 +232,67 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    if (rewardCardContainer) {
-        rewardCardContainer.addEventListener('click', () => {
-            const isFlipped = rewardCardFront.style.transform === 'rotateY(0deg)';
-            if (isFlipped) {
-                rewardCardFront.style.transform = 'rotateY(-180deg)';
-                rewardCardBack.style.transform = 'rotateY(0deg)';
+    if (claimRewardButton) {
+        // Der "Claim Reward" Button wird jetzt die Karte umdrehen
+        claimRewardButton.addEventListener('click', () => {
+            if (!isCardFlipped) { // Nur umdrehen, wenn nicht bereits umgedreht
+                flipCardAndClaimReward();
             } else {
-                rewardCardFront.style.transform = 'rotateY(0deg)';
-                rewardCardBack.style.transform = 'rotateY(180deg)';
+                // Wenn die Karte bereits gedreht ist, könnte der Button eine andere Aktion auslösen
+                // Zum Beispiel, direkt eine neue Belohnung beanspruchen, wenn eine verfügbar ist
+                // Oder einfach nichts tun, wenn keine neue Belohnung verfügbar ist
+                checkRewardEligibility(); // Aktualisiert den Status, falls sich die Bedingungen geändert haben
             }
         });
     }
 
-    if (claimRewardButton) {
-        claimRewardButton.addEventListener('click', () => {
-            claimReward();
+    // Event-Listener für das Klicken auf die Karte selbst
+    if (rewardCardFlipper) {
+        rewardCardFlipper.addEventListener('click', () => {
+            if (!isCardFlipped) {
+                flipCardAndClaimReward();
+            }
         });
     }
 
-    async function claimReward() {
+    async function flipCardAndClaimReward() {
         const rewardDeck = JSON.parse(localStorage.getItem('rewardDeck')) || [];
         if (rewardDeck.length === 0) {
             alert('Your reward deck is empty. Please add cards in the Settings.');
             return;
         }
 
+        const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
+        const collectedCards = JSON.parse(localStorage.getItem('collection')) || [];
+        if (!(workouts.length > collectedCards.length)) {
+            alert('Complete another workout to earn a reward before revealing.');
+            return;
+        }
+
+        // Karte drehen
+        if (rewardCardFlipper) {
+            rewardCardFlipper.style.transform = 'rotateY(180deg)';
+            isCardFlipped = true;
+        }
+
+        // Belohnung beanspruchen nach kurzer Verzögerung
+        setTimeout(async () => {
+            await claimRewardLogic(); // Die eigentliche Logik zum Beanspruchen der Belohnung
+        }, 350); // Halbe Dauer der Dreh-Animation
+
+        // Nach einer weiteren Verzögerung die Karte wieder auf die Vorderseite drehen
+        setTimeout(() => {
+            if (rewardCardFlipper) {
+                rewardCardFlipper.style.transform = 'rotateY(0deg)';
+                isCardFlipped = false;
+            }
+            initRewardPage(); // Setzt die Reward-Seite zurück
+        }, 3000); // Zeigt die aufgedeckte Karte für 3 Sekunden an
+    }
+
+    async function claimRewardLogic() {
+        const rewardDeck = JSON.parse(localStorage.getItem('rewardDeck')) || [];
+        
         const randomIndex = Math.floor(Math.random() * rewardDeck.length);
         const claimedCard = rewardDeck[randomIndex];
         
@@ -268,31 +305,32 @@ document.addEventListener('DOMContentLoaded', () => {
         rewardDeck.splice(randomIndex, 1);
         localStorage.setItem('rewardDeck', JSON.stringify(rewardDeck));
 
-        // Aktualisiere die UI
-        const rewardCardImage = document.getElementById('reward-card-image');
-        rewardCardImage.src = claimedCard.image_uris.normal;
-        rewardCardImage.alt = claimedCard.name;
+        // Update the UI with the claimed card image
+        if (rewardCardImage && claimedCard.image_uris && claimedCard.image_uris.normal) {
+            rewardCardImage.src = claimedCard.image_uris.normal;
+            rewardCardImage.alt = claimedCard.name;
+        } else if (rewardCardImage) {
+            rewardCardImage.src = 'https://via.placeholder.com/300x420?text=Card+Error';
+            rewardCardImage.alt = 'Error loading card image';
+        }
         
-        // Drehe die Karte um, um die Belohnung zu zeigen
-        rewardCardFront.style.transform = 'rotateY(0deg)';
-        rewardCardBack.style.transform = 'rotateY(180deg)';
-
-        localStorage.setItem('lastClaimTime', Date.now().toString());
-
         updateStats();
-        setTimeout(() => {
-            initRewardPage();
-        }, 3000);
+        // checkRewardEligibility wird in initRewardPage aufgerufen
     }
-
+    
+    // Initialisierung der Belohnungsseite
     function initRewardPage() {
-        const rewardCardImage = document.getElementById('reward-card-image');
-        rewardCardImage.src = '';
-        rewardCardFront.style.transform = 'rotateY(-180deg)';
-        rewardCardBack.style.transform = 'rotateY(0deg)';
-        checkRewardEligibility();
+        if (rewardCardFlipper) {
+            rewardCardFlipper.style.transform = 'rotateY(0deg)'; // Stellt sicher, dass die Karte auf der Vorderseite ist
+            isCardFlipped = false;
+        }
+        if (rewardCardImage) {
+            rewardCardImage.src = 'https://via.placeholder.com/300x420?text=Claim+Your+Reward'; // Setzt das Bild zurück
+            rewardCardImage.alt = 'Reward Card Placeholder';
+        }
+        checkRewardEligibility(); // Aktualisiert den Belohnungsstatus
     }
-
+    
     // Sammlung Logik (von 4_collection.html)
     const collectionGrid = document.getElementById('collection-grid');
     const rarityFilter = document.getElementById('rarity-filter');
