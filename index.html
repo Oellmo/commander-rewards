@@ -52,6 +52,8 @@
             border: 2px solid #fef0f0;
         }
     </style>
+<script>navigator.serviceWorker.register("service-worker.js")</script> 
+<link rel="manifest" href="manifest.json" />    
 </head>
 <body class="bg-[var(--background-color)] text-[var(--text-primary)] relative min-h-screen">
     <div class="max-w-md mx-auto relative h-screen">
@@ -103,21 +105,19 @@
 
             <div id="reward-page" class="page px-5 py-6 flex flex-col gap-8 items-center overflow-y-auto">
                 <h1 class="font-bold text-lg leading-normal text-center">Your Reward</h1>
-            
-            <div id="reward-card-flipper" class="w-3/4 max-w-xs relative aspect-[672/936] transition-transform duration-700 ease-in-out [transform-style:preserve-3d]">
-                <div id="reward-card-front" class="absolute inset-0 bg-gray-300 rounded-xl shadow-md flex flex-col items-center justify-center p-4 [backface-visibility:hidden]">
-                    <img id="reward-card-front-image" class="size-full rounded-lg object-cover" src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/513b7bfa-42c9-4d08-ad6c-8e5d478c42d3/dalfpib-83f22b02-5802-40b4-901b-3eecf0ca2058.png/v1/fit/w_828,h_1182,q_70,strp/unofficial_magic_the_gathering_six_color_card_back_by_lordnyriox_dalfpib-414w-2x.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTQ2MyIsInBhdGgiOiJcL2ZcLzUxM2I3YmZhLTQyYzktNGQwOC1hZDZjLThlNWQ0NzhjNDJkM1wvZGFsZnBpYi04M2YyMmIwMi01ODAyLTQwYjQtOTAxYi0zZWVjZjBjYTIwNTgucG5nIiwid2lkdGgiOiI8PTEwMjQifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.OGsglye34mbde4lkXNsDFFCl83jSzl1zNBLep-hhyKY" alt="Beschreibung des Bildes"/>
+                <div class="relative w-3/4 max-w-xs aspect-[672/936]">
+                    <div id="reward-card-flipper" class="size-full relative transition-transform duration-700 ease-in-out [transform-style:preserve-3d]">
+                        <div id="reward-card-front" class="absolute inset-0 [backface-visibility:hidden]">
+                            <img id="reward-card-front-image" class="size-full rounded-lg object-cover shadow-md" src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/513b7bfa-42c9-4d08-ad6c-8e5d478c42d3/dalfpib-83f22b02-5802-40b4-901b-3eecf0ca2058.png/v1/fit/w_828,h_1182,q_70,strp/unofficial_magic_the_gathering_six_color_card_back_by_lordnyriox_dalfpib-414w-2x.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTQ2MyIsInBhdGgiOiJcL2ZcLzUxM2I3YmZhLTQyYzktNGQwOC1hZDZjLThlNWQ0NzhjNDJkM1wvZGFsZnBpYi04M2YyMmIwMi01ODAyLTQwYjQtOTAxYi0zZWVjZjBjYTIwNTgucG5nIiwid2lkdGgiOiI8PTEwMjQifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.OGsglye34mbde4lkXNsDFFCl83jSzl1zNBLep-hhyKY" alt="Beschreibung des Bildes">
+                        </div>
+                        <div id="reward-card-back" class="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                            <img id="reward-card-image" class="size-full rounded-lg object-cover shadow-md" src="https://via.placeholder.com/300x420?text=Claim+Your+Reward" alt="Reward Card Placeholder"/>
+                        </div>
+                    </div>
                 </div>
-                <div id="reward-card-back" class="absolute inset-0 bg-gray-300 rounded-xl shadow-md flex flex-col items-center justify-center p-4 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                    <img id="reward-card-image" class="size-full rounded-lg object-cover" src="https://via.placeholder.com/300x420?text=Claim+Your+Reward" alt="Reward Card Placeholder"/>
-                </div>
-            </div>
-            
-                
                 <button id="claim-reward-button" class="px-5 py-3 text-white bg-[var(--primary-color)] rounded-full text-sm font-semibold shadow-lg">
                     Claim Reward
                 </button>
-                
                 <p id="reward-status-message" class="text-center text-sm font-medium leading-normal mt-4">
                     You have earned a reward! Tap to claim.
                 </p>
