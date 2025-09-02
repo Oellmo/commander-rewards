@@ -1,6 +1,6 @@
 {
 "name": "Commander-Rewards",
-"start_url": "/index.html",
+"start_url": "index.html",
 "display": "standalone",
 "description": "A workout and reward tracking app.",
 "lang": "de",
