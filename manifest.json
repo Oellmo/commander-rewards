@@ -5,7 +5,7 @@
 "description": "A workout and reward tracking app.",
 "lang": "de",
 "dir": "auto",
-"theme_color": "##FA7921",
+"theme_color": "#FA7921",
 "background_color": "#ffffff",
 "orientation": "any",
 "icons": [
